@@ -159,7 +159,7 @@ function ThemesTab() {
     }, []);
     async function refreshLocalThemes() {
         const themes = await VencordNative.themes.getThemesList();
-	setUserThemes(themes);
+setUserThemes(themes);
     }
 
     // When a local theme is enabled/disabled, update the settings

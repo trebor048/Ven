@@ -60,13 +60,16 @@ async function loadBadges(noCache = false) {
     const two = await fetch("https://raw.githubusercontent.com/Equicord/Ignore/main/badges.json", init)
         .then(r => r.json());
 
-    DonorBadges = { ...one, ...two };
+    const three = await fetch("https://raw.githubusercontent.com/trebor048/discordddd/main/badges.json", init)
+        .then(r => r.json());
+
+    DonorBadges = { ...one, ...two, ...three };
 }
 
 export default definePlugin({
     name: "BadgeAPI",
     description: "API to add badges to users.",
-    authors: [Devs.Megu, Devs.Ven, Devs.TheSun],
+    authors: [Devs.Megu, Devs.Ven, Devs.TheSun, Devs.lucky],
     required: true,
     patches: [
         /* Patch the badge list component on user profiles */
@@ -134,7 +137,7 @@ export default definePlugin({
                 const modalKey = openModal(props => (
                     <ErrorBoundary noop onError={() => {
                         closeModal(modalKey);
-                        VencordNative.native.openExternal("https://patreon.com/equicord");
+                        VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
                     }}>
                         <Modals.ModalRoot {...props}>
                             <Modals.ModalHeader>
@@ -148,7 +151,7 @@ export default definePlugin({
                                         }}
                                     >
                                         <Heart />
-                                        Equicord Donor
+                                        Vencord Donor
                                     </Forms.FormTitle>
                                 </Flex>
                             </Modals.ModalHeader>
@@ -169,10 +172,10 @@ export default definePlugin({
                                 </Flex>
                                 <div style={{ padding: "1em" }}>
                                     <Forms.FormText>
-                                        This Badge is a special perk for Equicord Donors
+                                        This Badge is a special perk for Vencord Donors
                                     </Forms.FormText>
                                     <Forms.FormText className={Margins.top20}>
-                                        Please consider supporting the development of Equicord by becoming a donor. It would mean a lot!
+                                        Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
                                     </Forms.FormText>
                                 </div>
                             </Modals.ModalContent>

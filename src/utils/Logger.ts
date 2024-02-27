@@ -54,7 +54,7 @@ export class Logger {
     }
 
     public errorCustomFmt(fmt: string, ...args: any[]) {
-        this._log("error", "#e78284", args, fmt);
+        this._log("error", "#db72d4", args, fmt);
     }
 
     public warn(...args: any[]) {

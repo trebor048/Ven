@@ -80,7 +80,7 @@ export async function installExt(id: string) {
             }
         });
         await extract(crxToZip(buf), extDir).catch(console.error);
-       }
+        }
 
     session.defaultSession.loadExtension(extDir);
 }

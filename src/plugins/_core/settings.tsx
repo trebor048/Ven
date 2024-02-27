@@ -83,12 +83,12 @@ export default definePlugin({
         return [
             {
                 section: SectionTypes.HEADER,
-                label: "Equicord",
+                label: "Vencord",
                 className: "vc-settings-header"
             },
             {
                 section: "VencordSettings",
-                label: "Equicord",
+                label: "Vencord",
                 element: require("@components/VencordSettings/VencordTab").default,
                 className: "vc-settings"
             },
@@ -101,7 +101,7 @@ export default definePlugin({
             {
                 section: "VencordThemes",
                 label: "Themes",
-                element: require("@components/ThemeSettings/ThemesTab").default,
+                element: require("@components/VencordSettings/ThemesTab").default,
                 className: "vc-themes"
             },
             !IS_UPDATER_DISABLED && {

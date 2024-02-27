@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import type StylusRenderer = require("stylus/lib/renderer");
-import type LessStatic from "less";
 
 import { makeLazy } from "./lazy";
 import { EXTENSION_BASE_URL } from "./web-metadata";

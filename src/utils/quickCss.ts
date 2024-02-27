@@ -21,11 +21,10 @@ import { Toasts } from "@webpack/common";
 
 import { compileUsercss } from "./themes/usercss/compiler";
 
+let style;
+let themesStyle;
 
-let style: HTMLStyleElement;
-let themesStyle: HTMLStyleElement;
-
-function createStyle(id: string) {
+function createStyle(id) {
     const style = document.createElement("style");
     style.id = id;
     document.documentElement.append(style);
@@ -42,29 +41,23 @@ async function initSystemValues() {
     createStyle("vencord-os-theme-values").textContent = `:root{${variables}}`;
 }
 
-export async function toggle(isEnabled: boolean) {
+export async function toggle(isEnabled) {
     if (!style) {
-        if (isEnabled) {
-            style = createStyle("vencord-custom-css");
-            VencordNative.quickCss.addChangeListener(css => {
-                style.textContent = css;
-                // At the time of writing this, changing textContent resets the disabled state
-                style.disabled = !Settings.useQuickCss;
-            });
-            style.textContent = await VencordNative.quickCss.get();
-        }
-    } else
-        style.disabled = !isEnabled;
+        style = createStyle("vencord-custom-css");
+        VencordNative.quickCss.addChangeListener(css => {
+            style.textContent = css;
+            style.disabled = !Settings.useQuickCss;
+        });
+        style.textContent = await VencordNative.quickCss.get();
+    }
+    style.disabled = !isEnabled;
 }
 
 async function initThemes() {
-    themesStyle ??= createStyle("vencord-themes");
-
+    themesStyle = themesStyle || createStyle("vencord-themes");
     const { themeLinks, disabledThemeLinks, enabledThemes } = Settings;
 
-    let links: string[] = [...themeLinks];
-
-    links = links.filter(link => !disabledThemeLinks.includes(link));
+    const links = [...themeLinks.filter(link => !disabledThemeLinks.includes(link))];
 
     if (IS_WEB) {
         for (const theme of enabledThemes) {
@@ -75,31 +68,26 @@ async function initThemes() {
             links.push(URL.createObjectURL(blob));
         }
     } else {
-        for (const theme of enabledThemes) if (!theme.endsWith(".user.css")) {
-            links.push(`vencord:///themes/${theme}?v=${Date.now()}`);
-        }
+        const localThemes = enabledThemes.map(theme => `vencord:///themes/${theme}?v=${Date.now()}`);
+        links.push(...localThemes);
     }
 
-    if (!IS_WEB || "armcord" in window) {
-        for (const theme of enabledThemes) if (theme.endsWith(".user.css")) {
-            // UserCSS goes through a compile step first
-            const css = await compileUsercss(theme);
-            if (!css) {
-                // let's not leave the user in the dark about this and point them to where they can find the error
-                Toasts.show({
-                    message: `Failed to compile ${theme}, check the console for more info.`,
-                    type: Toasts.Type.FAILURE,
-                    id: Toasts.genId(),
-                    options: {
-                        position: Toasts.Position.BOTTOM
-                    }
-                });
-                continue;
-            }
-
-            const blob = new Blob([css], { type: "text/css" });
-            links.push(URL.createObjectURL(blob));
+    for (const theme of enabledThemes.filter(theme => theme.endsWith(".user.css"))) {
+        const css = await compileUsercss(theme);
+        if (!css) {
+            Toasts.show({
+                message: `Failed to compile ${theme}, check the console for more info.`,
+                type: Toasts.Type.FAILURE,
+                id: Toasts.genId(),
+                options: {
+                    position: Toasts.Position.BOTTOM
+                }
+            });
+            continue;
         }
+
+        const blob = new Blob([css], { type: "text/css" });
+        links.push(URL.createObjectURL(blob));
     }
 
     themesStyle.textContent = links.map(link => `@import url("${link.trim()}");`).join("\n");
@@ -114,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     addSettingsListener("themeLinks", initThemes);
     addSettingsListener("enabledThemes", initThemes);
-    addSettingsListener("userCssVars", initThemes, false);
+    addSettingsListener("userCssVars", initThemes);
 
     if (!IS_WEB)
         VencordNative.quickCss.addThemeChangeListener(initThemes);
