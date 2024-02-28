@@ -31,9 +31,9 @@ import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { Alerts, Button, FluxDispatcher, Menu, MessageStore, React, Toasts, UserStore } from "@webpack/common";
 
+import { ImageCacheDir, LogsDir } from "./components/FolderSelectInput";
 import { OpenLogsButton } from "./components/LogsButton";
 import { openLogModal } from "./components/LogsModal";
-import { ImageCacheDir, LogsDir } from "./components/settings/FolderSelectInput";
 import { addMessage, loggedMessages, MessageLoggerStore, removeLog } from "./LoggedMessageManager";
 import * as LoggedMessageManager from "./LoggedMessageManager";
 import { LoadMessagePayload, LoggedAttachment, LoggedMessage, LoggedMessageJSON, MessageCreatePayload, MessageDeleteBulkPayload, MessageDeletePayload, MessageUpdatePayload } from "./types";
@@ -48,7 +48,7 @@ import * as ImageManager from "./utils/saveImage/ImageManager";
 import { downloadLoggedMessages } from "./utils/settingsUtils";
 
 
-export const Flogger = new Logger("MLEnhanced", "#f26c6c");
+export const Flogger = new Logger("MessageLoggerEnhanced", "#f26c6c");
 
 export const cacheSentMessages = new LimitedMap<string, LoggedMessageJSON>();
 
@@ -307,7 +307,7 @@ export const settings = definePluginSettings({
     alwaysLogCurrentChannel: {
         default: true,
         type: OptionType.BOOLEAN,
-        description: "Always log current selected channel. Blacklisted channels/users will still be ignored.",
+        description: "Always log current selected channel",
     },
 
     messageLimit: {
@@ -408,9 +408,9 @@ export const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "MLEnhanced",
+    name: "MessageLoggerEnhanced",
     authors: [Devs.Aria],
-    description: "Using MessageLogger MLEnhanced logs every server and dm.",
+    description: "G'day",
     dependencies: ["MessageLogger"],
 
     patches: [
@@ -470,15 +470,6 @@ export default definePlugin({
                 match: /\i\.(?:default\.)?focusMessage\(/,
                 replace: "!(arguments[0]?.message?.deleted || arguments[0]?.message?.editHistory?.length > 0) && $&"
             }
-        },
-
-        // only check for expired attachments if the message is not deleted
-        {
-            find: "\"/ephemeral-attachments/\"",
-            replacement: {
-                match: /\i\.attachments\.some\(\i\)\|\|\i\.embeds\.some/,
-                replace: "!arguments[0].deleted && $&"
-            }
         }
     ],
     settings,
@@ -512,8 +503,6 @@ export default definePlugin({
     LoggedMessageManager,
     ImageManager,
     imageUtils,
-
-    isDeletedMessage: (id: string) => loggedMessages.deletedMessages[id] != null,
 
     getDeleted(m1, m2) {
         const deleted = m2?.deleted;

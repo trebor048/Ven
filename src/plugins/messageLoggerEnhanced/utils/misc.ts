@@ -77,15 +77,10 @@ export function findLastIndex<T>(array: T[], predicate: (e: T, t: number, n: T[]
     return -1;
 }
 
-const getTimestamp = (timestamp: any): Date => {
-    return new Date(timestamp);
-};
-
 export const mapEditHistory = (m: any) => {
-    m.timestamp = getTimestamp(m.timestamp);
+    m.timestamp = new Date(m.timestamp);
     return m;
 };
-
 
 export const messageJsonToMessageClass = memoize((log: { message: LoggedMessageJSON; }) => {
     // console.time("message populate");
@@ -93,14 +88,15 @@ export const messageJsonToMessageClass = memoize((log: { message: LoggedMessageJ
 
     const message: LoggedMessage = new MessageClass(log.message);
     // @ts-ignore
-    message.timestamp = getTimestamp(message.timestamp);
+    message.timestamp = new Date(message.timestamp);
 
     const editHistory = message.editHistory?.map(mapEditHistory);
     if (editHistory && editHistory.length > 0) {
         message.editHistory = editHistory;
     }
     if (message.editedTimestamp)
-        message.editedTimestamp = getTimestamp(message.editedTimestamp) as any;
+        // @ts-ignore
+        message.editedTimestamp = new Date(message.editedTimestamp);
     message.author = new AuthorClass(message.author);
     (message.author as any).nick = (message.author as any).globalName ?? message.author.username;
 

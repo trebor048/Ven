@@ -49,7 +49,7 @@ export let loggedMessages: LoggedMessages = defaultLoggedMessages;
         }
 
         if (IS_WEB) {
-            Flogger.log("hii. no point in checking DataStore if. we already did up there ^^");
+            Flogger.log("hii. no point in checking DataStore if. we already did up there ^");
             return;
         }
 
@@ -257,7 +257,7 @@ async function cleanMessages(loggedMessages: LoggedMessages, _Native: any = Nati
         }
 
         if (hasChanged)
-            await _Native.writeLogs(Settings.plugins.MLEnhanced.logsDir, JSON.stringify(cleaned));
+            await _Native.writeLogs(Settings.plugins.MessageLoggerEnhanced.logsDir, JSON.stringify(cleaned));
 
         return cleaned;
 
