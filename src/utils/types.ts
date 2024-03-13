@@ -286,6 +286,7 @@ export interface DefinedSettings<
     Checks extends SettingsChecks<Def> = {},
     PrivateSettings extends object = {}
 > {
+    plugins: any;
     /** Shorthand for `Vencord.Settings.plugins.PluginName`, but with typings */
     store: SettingsStore<Def> & PrivateSettings;
     /**
