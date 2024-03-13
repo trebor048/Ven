@@ -43,9 +43,10 @@ export function mergeDefaults<T>(obj: T, defaults: T): T {
  * Calls .join(" ") on the arguments
  * classes("one", "two") => "one two"
  */
-export function classes(...classes: Array<string | null | undefined>) {
+export function classes(...classes: Array<string | null | undefined | false>) {
     return classes.filter(Boolean).join(" ");
 }
+
 
 /**
  * Returns a promise that resolves after the specified amount of time
