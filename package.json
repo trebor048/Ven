@@ -22,7 +22,7 @@
         "doc": "docs"
     },
     "scripts": {
-        "binj": "cd src/userplugins/ && git clone https://github.com/trebor048/myplugins/ && cd myplugins && git pull && cd .. && git clone https://github.com/D3SOX/vencord-userplugins && cd vencord-userplugins && git pull && cd .. && git clone https://github.com/Kyuuhachi/VencordPlugins && cd vencordplugins && git pull && cd .. && cd .. && pnpm build && pnpm inject",
+        "binj": "cd src && mkdir userplugins && cd userplugins && git clone https://github.com/trebor048/myplugins/ && cd myplugins && git pull && cd .. && git clone https://github.com/D3SOX/vencord-userplugins && cd vencord-userplugins && git pull && cd .. && git clone https://github.com/Kyuuhachi/VencordPlugins && cd VencordPlugins && git pull && cd ../.. && pnpm install && pnpm build && pnpm inject",
         "new": "pnpm install && pnpm install && pnpm build && pnpm inject",
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
