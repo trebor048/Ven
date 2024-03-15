@@ -138,6 +138,16 @@ export default definePlugin({
             ],
             onChange: () => addDeleteStyle()
         },
+        logDeletes: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log deleted messages",
+            default: true,
+        },
+        logEdits: {
+            type: OptionType.BOOLEAN,
+            description: "Whether to log edited messages",
+            default: true,
+        },
         ignoreBots: {
             type: OptionType.BOOLEAN,
             description: "Whether to ignore messages by bots",
@@ -198,7 +208,7 @@ export default definePlugin({
         return cache;
     },
 
-    shouldIgnore(message: any) {
+    shouldIgnore(message: any, isEdit: boolean = false) {
         const { ignoreBots, ignoreSelf, ignoreUsers, ignoreChannels, ignoreGuilds } = Settings.plugins.MessageLogger;
         const myId = UserStore.getCurrentUser().id;
 
@@ -206,7 +216,7 @@ export default definePlugin({
             ignoreSelf && message.author?.id === myId ||
             ignoreUsers.includes(message.author?.id) ||
             ignoreChannels.includes(message.channel_id) ||
-            ignoreChannels.includes(ChannelStore.getChannel(message.channel_id)?.parent_id) ||
+            (isEdit ? !Settings.plugins.MessageLogger.logEdits : !Settings.plugins.MessageLogger.logDeletes) ||
             ignoreGuilds.includes(ChannelStore.getChannel(message.channel_id)?.guild_id);
     },
 
@@ -242,7 +252,7 @@ export default definePlugin({
                     match: /(MESSAGE_UPDATE:function\((\i)\).+?)\.update\((\i)/,
                     replace: "$1" +
                         ".update($3,m =>" +
-                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message)) ? m :" +
+                        "   (($2.message.flags & 64) === 64 || $self.shouldIgnore($2.message, true)) ? m :" +
                         "   $2.message.content !== m.editHistory?.[0]?.content && $2.message.content !== m.content ?" +
                         "       m.set('editHistory',[...(m.editHistory || []), $self.makeEdit($2.message, m)]) :" +
                         "       m" +
@@ -302,7 +312,7 @@ export default definePlugin({
                     match: /attachments:(\i)\((\i)\)/,
                     replace:
                         "attachments: $1((() => {" +
-						"   if ($self.shouldIgnore($2)) return $2;" +
+                        "   if ($self.shouldIgnore($2)) return $2;" +
                         "   let old = arguments[1]?.attachments;" +
                         "   if (!old) return $2;" +
                         "   let new_ = $2.attachments?.map(a => a.id) ?? [];" +

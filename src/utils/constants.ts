@@ -538,7 +538,59 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     lucky: {
         name: "LuckyCanucky",
         id: 0n
-    }
+    },
+    Hexo: {
+        name: "Hexo",
+        id: 571981658874445836n
+    },
+    Noxillio: {
+        name: "Noxillio",
+        id: 138616536502894592n,
+    },
+    Fres: {
+        name: "fres",
+        id: 843448897737064448n
+    },
+    newwares: {
+        name: "newwares",
+        id: 421405303951851520n,
+    },
+    Byron: {
+        name: "byron",
+        id: 639577344276692992n
+    },
+    Sphirye: {
+        name: "Sphirye",
+        id: 858410144349945867n,
+    },
+    Mannu: {
+        name: "MannuVilasara",
+        id: 786926252811485186n,
+    },
+    Johannes7k75: {
+        name: "Johannes7k75",
+        id: 587701169103699994n
+    },
+    nin0dev: {
+        name: "nin0dev",
+        id: 886685857560539176n,
+    },
+    Inbestigator: {
+        name: "Inbestigator",
+        id: 761777382041714690n
+    },
+    catcraft: {
+        name: "catcraft",
+        id: 290162449213292546n,
+    },
+    Trwy: {
+        name: "trey",
+        id: 354427199023218689n
+    },
+    OIRNOIR: {
+        name: "OIRNOIR",
+        id: 720842469024989195n
+    },
 } satisfies Record<string, Dev>);
 
 // iife so #__PURE__ works correctly

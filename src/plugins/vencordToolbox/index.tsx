@@ -1,59 +1,52 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./index.css";
 
 import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { Settings } from "@api/Settings";
+import { Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findExportedComponentLazy } from "@webpack";
-import { Menu, Popout, useState } from "@webpack/common";
+import { Menu, Popout, Toasts, useState } from "@webpack/common";
 import type { ReactNode } from "react";
+import { actions, ButtonAction } from "suncordplugins/commandPalette/commands";
+
+
 
 const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
 
+function togglePlugin(plugin: ButtonAction, enabled: boolean) {
+    Settings.plugins[plugin.id].enabled = enabled;
+
+    Toasts.show({
+        message: `Successfully ${enabled ? "enabled" : "disabled"} ${plugin.id}`,
+        type: Toasts.Type.SUCCESS,
+        id: Toasts.genId(),
+        options: {
+            position: Toasts.Position.BOTTOM
+        }
+    });
+}
+
 function VencordPopout(onClose: () => void) {
+    const { useQuickCss } = useSettings(["useQuickCss"]);
+
     const pluginEntries = [] as ReactNode[];
 
-    for (const plugin of Object.values(Vencord.Plugins.plugins)) {
-        if (plugin.toolboxActions && Vencord.Plugins.isPluginEnabled(plugin.name)) {
-            pluginEntries.push(
-                <Menu.MenuGroup
-                    label={plugin.name}
-                    key={`vc-toolbox-${plugin.name}`}
-                >
-                    {Object.entries(plugin.toolboxActions).map(([text, action]) => {
-                        const key = `vc-toolbox-${plugin.name}-${text}`;
-
-                        return (
-                            <Menu.MenuItem
-                                id={key}
-                                key={key}
-                                label={text}
-                                action={action}
-                            />
-                        );
-                    })}
-                </Menu.MenuGroup>
-            );
-        }
+    for (const action of actions) {
+        pluginEntries.push(
+            <Menu.MenuItem
+                id={`vc-toolbox-${action.id}`}
+                label={action.label}
+                action={action.callback}
+                key={`vc-toolbox-${action.id}`}
+            />
+        );
     }
 
     return (
@@ -66,13 +59,17 @@ function VencordPopout(onClose: () => void) {
                 label="Open Notification Log"
                 action={openNotificationLogModal}
             />
+            <Menu.MenuItem
+                id="vc-toolbox-theme"
+                label="Toggle Local Themes"
+                action={openNotificationLogModal}
+            />
             <Menu.MenuCheckboxItem
                 id="vc-toolbox-quickcss-toggle"
-                checked={Settings.useQuickCss}
+                checked={useQuickCss}
                 label={"Enable QuickCSS"}
                 action={() => {
-                    Settings.useQuickCss = !Settings.useQuickCss;
-                    onClose();
+                    Settings.useQuickCss = !useQuickCss;
                 }}
             />
             <Menu.MenuItem
@@ -109,7 +106,7 @@ function VencordPopoutButton() {
                 <HeaderBarIcon
                     className="vc-toolbox-btn"
                     onClick={() => setShow(v => !v)}
-                    tooltip={isShown ? null : "Vencord Toolbox"}
+                    tooltip={isShown ? null : "Suncord Toolbox"}
                     icon={() => VencordPopoutIcon(isShown)}
                     selected={isShown}
                 />
@@ -132,7 +129,7 @@ function ToolboxFragmentWrapper({ children }: { children: ReactNode[]; }) {
 export default definePlugin({
     name: "VencordToolbox",
     description: "Adds a button next to the inbox button in the channel header that houses Vencord quick actions",
-    authors: [Devs.Ven, Devs.AutumnVN],
+    authors: [Devs.Ven, Devs.AutumnVN, Devs.lucky],
 
     patches: [
         {
