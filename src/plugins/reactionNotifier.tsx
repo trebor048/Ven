@@ -18,9 +18,9 @@
 
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { Queue } from "@utils/Queue";
-import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, MessageStore, NavigationRouter, RestAPI, Text, UserStore } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -40,7 +40,7 @@ const messageFetchQueue = new Queue();
 export default definePlugin({
     name: "ReactionNotifier",
     description: "Notifies you when someone reacts to your message",
-    authors: [Devs.Animal],
+    authors: [Devs.lucky],
     settings,
 
 
@@ -54,7 +54,7 @@ export default definePlugin({
             if (user.bot && settings.store.ignoreBots) return;
             // TODO: fetch unloaded messages or else get undefined content error lol
             let msg = messageCache.get(r.messageId)?.message;
-            let msgId = r.messageId;
+            const msgId = r.messageId;
             if (!msg) {
                 msg ??= MessageStore.getMessage(r.channelId, msgId);
                 if (msg) {

@@ -310,6 +310,15 @@ function ThemesTab() {
     }
 
     function renderLocalThemes() {
+        const sortedUserThemes = useMemo(() => {
+            // Sort themes by whether they are enabled, ensuring enabled themes come first
+            return [...(userThemes || [])].sort((a, b) => {
+                const aEnabled = settings.enabledThemes.includes(a.header.fileName) ? -1 : 0;
+                const bEnabled = settings.enabledThemes.includes(b.header.fileName) ? -1 : 0;
+                return aEnabled - bEnabled; // Ensure enabled themes are sorted to the top
+            });
+        }, [userThemes, settings.enabledThemes]);
+
         return (
             <>
                 <Card className="vc-settings-card">
@@ -373,7 +382,7 @@ function ThemesTab() {
                     </Card>
 
                     <div className={cl("grid")}>
-                        {userThemes?.map(({ type, header: theme }: ThemeHeader) => (
+                        {sortedUserThemes.map(({ type, header: theme }: ThemeHeader) => (
                             type === "other" ? (
                                 <OtherThemeCard
                                     key={theme.fileName}
@@ -398,13 +407,13 @@ function ThemesTab() {
                                     }}
                                     theme={theme as UserstyleHeader}
                                 />
-                            )))}
+                            )
+                        ))}
                     </div>
                 </Forms.FormSection>
             </>
         );
     }
-
     return (
         <SettingsTab title="Themes">
             <TabBar
