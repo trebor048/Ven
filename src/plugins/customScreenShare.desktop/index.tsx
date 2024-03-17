@@ -20,8 +20,9 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, StartAt } from "@utils/types";
 import { Forms, Menu, TextInput, useState } from "@webpack/common";
-import { cooldown, denormalize, normalize } from "./utils";
+
 import { goofs } from "./goofs";
+import { cooldown, denormalize, normalize } from "./utils";
 
 const settings = definePluginSettings({
     maxFPS: {
@@ -159,10 +160,10 @@ export default definePlugin({
         const [value, setValue] = useState(group === "fps" ? fps : res);
         const { maxFPS, maxResolution, roundValues } = settings.store;
 
-        let maxValue = group === "fps" ? maxFPS : maxResolution,
+        const maxValue = group === "fps" ? maxFPS : maxResolution,
             minValue = group === "fps" ? 1 : 22; // 0 FPS freezes (obviously) and anything less than 22p doesn't work
 
-        let onChange = (number: number) => {
+        const onChange = (number: number) => {
             let tmp = denormalize(number, minValue, maxValue);
             if (roundValues)
                 tmp = Math.round(tmp);
@@ -187,7 +188,7 @@ export default definePlugin({
     BitrateSlider(name: "target" | "min" | "max") {
         const [bitrate, setBitrate] = useState(this.settings.store[name + "Bitrate"]);
         const { minBitrate, maxBitrate } = settings.store;
-        let onChange = (number: number) => {
+        const onChange = (number: number) => {
             const tmp = denormalize(number, name === "min" ? 1000 : minBitrate, name === "max" ? 20000000 : maxBitrate);
             setBitrate(tmp);
             this.settings.store[name + "Bitrate"] = Math.round(tmp);

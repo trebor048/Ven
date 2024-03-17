@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 let isOnCooldown = false;
 let nextFunction: Function | undefined = undefined;
 
@@ -9,7 +15,7 @@ export function cooldown(func: Function | undefined) {
     isOnCooldown = true;
     nextFunction = undefined;
 
-    if (func && typeof func === 'function')
+    if (func && typeof func === "function")
         func();
 
     setTimeout(() => {
