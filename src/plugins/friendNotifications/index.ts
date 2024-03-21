@@ -33,7 +33,7 @@ export default definePlugin({
     name: "Friend Notifications",
     description: "Send notifications when friends change their status.",
     authors: [
-        Devs.Lucky
+        Devs.lucky
     ],
     settings,
     contextMenuOpen,
