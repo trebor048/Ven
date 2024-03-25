@@ -1,51 +1,75 @@
-// HotKeyRecorder.tsx
-import React, { useState, useEffect } from 'react';
+/*
+ * Vencord, a modification for Discord's desktop app
+ * Copyright (c) 2022 Vendicated and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
-interface HotKeyRecorderProps {
-    value: string[]; // The current value of the hotkey
-    onChange: (newValue: string[]) => void; // Function to update the hotkey
+import { useState } from "@webpack/common";
+
+interface HotkeyRecorderProps {
+    defaultHotkey: string[];
+    onHotkeyChange: (newHotkey: string[]) => void;
 }
 
-const HotKeyRecorder: React.FC<HotKeyRecorderProps> = ({ value, onChange }) => {
+export function HotkeyRecorder({ defaultHotkey, onHotkeyChange }: HotkeyRecorderProps) {
     const [isRecording, setIsRecording] = useState(false);
-    const [displayedKeys, setDisplayedKeys] = useState<string[]>(value);
+    const [currentHotkey, setCurrentHotkey] = useState(defaultHotkey);
 
-    useEffect(() => {
-        if (!isRecording) return;
+    const startRecording = () => {
+        setIsRecording(true);
+        // Add event listeners to record the hotkey
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keyup", handleKeyUp);
+    };
 
-        const keydownListener = (e: KeyboardEvent) => {
-            // Avoid recording common keys and modifiers alone
-            if (["Shift", "Control", "Alt", "Meta"].includes(e.key)) return;
+    const stopRecording = () => {
+        setIsRecording(false);
+        // Remove event listeners after recording
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keyup", handleKeyUp);
+    };
 
-            const newKey = e.key;
-            const newDisplayedKeys = Array.from(new Set([...displayedKeys, newKey])); // Ensure unique keys
-            setDisplayedKeys(newDisplayedKeys);
-            onChange(newDisplayedKeys); // Notify about the change
-            e.preventDefault(); // Prevent default actions
-        };
+    const handleKeyDown = (e: KeyboardEvent) => {
+        // Handle keydown event to record the hotkey
+        e.preventDefault();
+        // Logic to record the key press
+        // Update currentHotkey state
+    };
 
-        document.addEventListener('keydown', keydownListener);
-        return () => document.removeEventListener('keydown', keydownListener);
-    }, [isRecording, displayedKeys, onChange]);
+    const handleKeyUp = (e: KeyboardEvent) => {
+        // Handle keyup event to record the hotkey
+        e.preventDefault();
+        // Logic to record the key release
+        // Update currentHotkey state
+    };
 
-    const toggleRecording = () => {
-        setIsRecording(!isRecording);
-        if (isRecording) {
-            // Optionally reset displayedKeys if you want to start fresh each time
-            // setDisplayedKeys([]);
-        }
+    const saveHotkey = () => {
+        // Save the recorded hotkey and call the callback function
+        onHotkeyChange(currentHotkey);
+        stopRecording();
     };
 
     return (
-        <div onClick={toggleRecording} style={{ cursor: 'pointer' }}>
-            <div>
-                {isRecording ? "Press any keys..." : displayedKeys.join(" + ") || "Click here to set hotkey"}
-                <button onClick={toggleRecording} disabled={isRecording}>
-                    {isRecording ? "Recording..." : "Record keybind"}
-                </button>
-            </div>
+        <div>
+            <div>{currentHotkey.join(" + ")}</div>
+            <button onClick={isRecording ? stopRecording : startRecording}>
+                {isRecording ? "Stop Recording" : "Start Recording"}
+            </button>
+            <button onClick={saveHotkey} disabled={isRecording}>
+                Save Hotkey
+            </button>
         </div>
     );
-};
-
-export default HotKeyRecorder;
+}

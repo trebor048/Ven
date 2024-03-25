@@ -21,7 +21,7 @@ import "./styles.css";
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs, SuncordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy, findStoreLazy } from "@webpack";
 
@@ -109,7 +109,7 @@ const xboxUrl = "https://discord.com/assets/9a15d086141be29d9fcd.png";
 export default definePlugin({
     name: "MemberListActivities",
     description: "Shows activity icons in the member list",
-    authors: [Devs.D3SOX, SuncordDevs.nyx],
+    authors: [Devs.D3SOX, Devs.nyx],
     tags: ["activity"],
 
     settings,

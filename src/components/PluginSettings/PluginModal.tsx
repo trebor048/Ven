@@ -91,16 +91,21 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     React.useEffect(() => {
         (async () => {
-            for (const user of plugin.authors.slice(0, 6)) {
-                const author = user.id
-                    ? await UserUtils.getUser(`${user.id}`)
-                        .catch(() => makeDummyUser({ username: user.name }))
-                    : makeDummyUser({ username: user.name });
-
-                setAuthors(a => [...a, author]);
+            if (plugin && plugin.authors && plugin.authors.length > 0) {
+                for (const user of plugin.authors.slice(0, 6)) {
+                    if (user && user.id) {
+                        const author = await UserUtils.getUser(`${user.id}`)
+                            .catch(() => makeDummyUser({ username: user.name }));
+                        setAuthors(a => [...a, author]);
+                    } else if (user) {
+                        const author = makeDummyUser({ username: user.name });
+                        setAuthors(a => [...a, author]);
+                    }
+                }
             }
         })();
     }, []);
+
 
     async function saveAndClose() {
         if (!plugin.options) {

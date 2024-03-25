@@ -3,18 +3,18 @@
     "private": "true",
     "version": "1.6.9",
     "description": "The cutest Discord client mod with extras",
-    "homepage": "https://github.com/Equicord/Equicord#readme",
+    "homepage": "https://github.com/trebor048/ven",
     "bugs": {
-        "url": "https://github.com/Equicord/Equicord/issues"
+        "url": "https://github.com/trebor048/ven"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Equicord/Equicord.git"
+        "url": "git+https://github.com/trebor048/ven"
     },
     "license": "GPL-3.0-or-later",
     "author": "Vendicated",
     "contributors": [
-        "Equicord",
+        "LuckyCanucky",
         "Thororen1234",
         "Yeetov"
     ],
@@ -28,8 +28,8 @@
         "buildWeb": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/buildWeb.mjs",
         "generatePluginJson": "tsx scripts/generatePluginList.ts",
         "inject": "node scripts/runInstaller.mjs",
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern src/userplugins",
-        "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "lint-styles": "stylelint \"src/**/*.css\"",
         "lint:fix": "pnpm lint --fix",
         "test": "pnpm build && pnpm lint:fix && pnpm lint-styles && pnpm testTsc && pnpm generatePluginJson",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",

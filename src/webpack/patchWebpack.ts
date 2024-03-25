@@ -186,91 +186,94 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
             const executePatch = traceFunction(`patch by ${patch.plugin}`, (match: string | RegExp, replace: string) => code.replace(match, replace));
             if (patch.predicate && !patch.predicate()) continue;
 
-            if (code.includes(patch.find)) {
-                patchedBy.add(patch.plugin);
+            // we change all patch.find to array in plugins/index
+            if ((patch.find as string[]).every(f => code.includes(f))) {
+                {
+                    patchedBy.add(patch.plugin);
 
-                const previousMod = mod;
-                const previousCode = code;
+                    const previousMod = mod;
+                    const previousCode = code;
 
-                // we change all patch.replacement to array in plugins/index
-                for (const replacement of patch.replacement as PatchReplacement[]) {
-                    if (replacement.predicate && !replacement.predicate()) continue;
-                    const lastMod = mod;
-                    const lastCode = code;
+                    // we change all patch.replacement to array in plugins/index
+                    for (const replacement of patch.replacement as PatchReplacement[]) {
+                        if (replacement.predicate && !replacement.predicate()) continue;
+                        const lastMod = mod;
+                        const lastCode = code;
 
-                    canonicalizeReplacement(replacement, patch.plugin);
+                        canonicalizeReplacement(replacement, patch.plugin);
 
-                    try {
-                        const newCode = executePatch(replacement.match, replacement.replace as string);
-                        if (newCode === code) {
-                            if (!patch.noWarn) {
-                                logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
-                                if (IS_DEV) {
-                                    logger.debug("Function Source:\n", code);
+                        try {
+                            const newCode = executePatch(replacement.match, replacement.replace as string);
+                            if (newCode === code) {
+                                if (!patch.noWarn) {
+                                    logger.warn(`Patch by ${patch.plugin} had no effect (Module id is ${id}): ${replacement.match}`);
+                                    if (IS_DEV) {
+                                        logger.debug("Function Source:\n", code);
+                                    }
                                 }
+
+                                if (patch.group) {
+                                    logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
+                                    code = previousCode;
+                                    mod = previousMod;
+                                    patchedBy.delete(patch.plugin);
+                                    break;
+                                }
+                            } else {
+                                code = newCode;
+                                mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
+                            }
+                        } catch (err) {
+                            logger.error(`Patch by ${patch.plugin} errored (Module id is ${id}): ${replacement.match}\n`, err);
+
+                            if (IS_DEV) {
+                                const changeSize = code.length - lastCode.length;
+                                const match = lastCode.match(replacement.match)!;
+
+                                // Use 200 surrounding characters of context
+                                const start = Math.max(0, match.index! - 200);
+                                const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
+                                // (changeSize may be negative)
+                                const endPatched = end + changeSize;
+
+                                const context = lastCode.slice(start, end);
+                                const patchedContext = code.slice(start, endPatched);
+
+                                // inline require to avoid including it in !IS_DEV builds
+                                const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
+                                let fmt = "%c %s ";
+                                const elements = [] as string[];
+                                for (const d of diff) {
+                                    const color = d.removed
+                                        ? "red"
+                                        : d.added
+                                            ? "lime"
+                                            : "grey";
+                                    fmt += "%c%s";
+                                    elements.push("color:" + color, d.value);
+                                }
+
+                                logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
+                                logger.errorCustomFmt(...Logger.makeTitle("white", "After"), patchedContext);
+                                const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
+                                logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
                             }
 
+                            patchedBy.delete(patch.plugin);
                             if (patch.group) {
-                                logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} had no effect`);
+                                logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
                                 code = previousCode;
                                 mod = previousMod;
-                                patchedBy.delete(patch.plugin);
                                 break;
                             }
-                        } else {
-                            code = newCode;
-                            mod = (0, eval)(`// Webpack Module ${id} - Patched by ${[...patchedBy].join(", ")}\n${newCode}\n//# sourceURL=WebpackModule${id}`);
+
+                            code = lastCode;
+                            mod = lastMod;
                         }
-                    } catch (err) {
-                        logger.error(`Patch by ${patch.plugin} errored (Module id is ${id}): ${replacement.match}\n`, err);
-
-                        if (IS_DEV) {
-                            const changeSize = code.length - lastCode.length;
-                            const match = lastCode.match(replacement.match)!;
-
-                            // Use 200 surrounding characters of context
-                            const start = Math.max(0, match.index! - 200);
-                            const end = Math.min(lastCode.length, match.index! + match[0].length + 200);
-                            // (changeSize may be negative)
-                            const endPatched = end + changeSize;
-
-                            const context = lastCode.slice(start, end);
-                            const patchedContext = code.slice(start, endPatched);
-
-                            // inline require to avoid including it in !IS_DEV builds
-                            const diff = (require("diff") as typeof import("diff")).diffWordsWithSpace(context, patchedContext);
-                            let fmt = "%c %s ";
-                            const elements = [] as string[];
-                            for (const d of diff) {
-                                const color = d.removed
-                                    ? "red"
-                                    : d.added
-                                        ? "lime"
-                                        : "grey";
-                                fmt += "%c%s";
-                                elements.push("color:" + color, d.value);
-                            }
-
-                            logger.errorCustomFmt(...Logger.makeTitle("white", "Before"), context);
-                            logger.errorCustomFmt(...Logger.makeTitle("white", "After"), patchedContext);
-                            const [titleFmt, ...titleElements] = Logger.makeTitle("white", "Diff");
-                            logger.errorCustomFmt(titleFmt + fmt, ...titleElements, ...elements);
-                        }
-
-                        patchedBy.delete(patch.plugin);
-                        if (patch.group) {
-                            logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
-                            code = previousCode;
-                            mod = previousMod;
-                            break;
-                        }
-
-                        code = lastCode;
-                        mod = lastMod;
                     }
-                }
 
-                if (!patch.all) patches.splice(i--, 1);
+                    if (!patch.all) patches.splice(i--, 1);
+                }
             }
         }
     }

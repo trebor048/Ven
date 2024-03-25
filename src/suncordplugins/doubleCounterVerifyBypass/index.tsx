@@ -17,7 +17,7 @@
 */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
-import { SuncordDevs } from "@utils/constants";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Alerts, Menu } from "@webpack/common";
 import { Message } from "discord-types/general";
@@ -69,7 +69,7 @@ async function verify(link) {
 export default definePlugin({
     name: "DoubleCounterVerifyBypass",
     description: "Bypass Double Counter verifications easily.",
-    authors: [SuncordDevs.nyx],
+    authors: [Devs.nyx],
 
     start() {
         addContextMenuPatch("message", patchMessageContextMenu);

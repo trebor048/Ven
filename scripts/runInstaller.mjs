@@ -85,7 +85,7 @@ async function ensureBinary() {
 
         const ff = await import("fflate");
         const bytes = ff.unzipSync(zip, {
-            filter: (f) => f.name === INSTALLER_PATH_DARWIN,
+            filter: f => f.name === INSTALLER_PATH_DARWIN,
         })[INSTALLER_PATH_DARWIN];
 
         writeFileSync(outputFile, bytes, { mode: 0o755 });
@@ -95,7 +95,7 @@ async function ensureBinary() {
         );
         console.log("xattr might error, that's okay");
 
-        const logAndRun = (cmd) => {
+        const logAndRun = cmd => {
             console.log("Running", cmd);
             try {
                 execSync(cmd);

@@ -26,7 +26,8 @@ export {
 
 export const WEBPACK_CHUNK = "webpackChunkdiscord_app";
 export const REACT_GLOBAL = "Vencord.Webpack.Common.React";
-export const VENCORD_USER_AGENT = `Vencord/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
+export const VENCORD_USER_AGENT = `ven/${gitHash}${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
+export const VENCORD_USER_AGENT_HASHLESS = `ven${gitRemote ? ` (https://github.com/${gitRemote})` : ""}`;
 export const SUPPORT_CHANNEL_ID = "1173342942858055721";
 
 export interface Dev {
@@ -590,6 +591,22 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     OIRNOIR: {
         name: "OIRNOIR",
         id: 720842469024989195n
+    },
+    bhop: {
+        name: "bhop",
+        id: 0n
+    },
+    nyx: {
+        name: "nyx",
+        id: 0n
+    },
+    Drag: {
+        name: "Drag",
+        id: 0n
+    },
+    Woosh: {
+        name: "Woosh",
+        id: 0n
     },
 } satisfies Record<string, Dev>);
 

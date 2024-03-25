@@ -1,11 +1,18 @@
-import definePlugin, { OptionType } from "@utils/types";
-import { openCommandPalette } from "./components/CommandPalette";
-import { closeAllModals } from "@utils/modal";
-import { Button, SettingsRouter, useState } from "@webpack/common";
-import { registerAction } from "./commands";
-import { Devs } from "@utils/constants";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { Devs } from "@utils/constants";
+import { closeAllModals } from "@utils/modal";
+import definePlugin, { OptionType } from "@utils/types";
+import { SettingsRouter, useState } from "@webpack/common";
+
+import { registerAction } from "./commands";
+import { openCommandPalette } from "./components/CommandPalette";
 
 const cl = classNameFactory("vc-command-palette-");
 let isRecordingGlobal: boolean = false;
@@ -19,8 +26,8 @@ export const settings = definePluginSettings({
             const [isRecording, setIsRecording] = useState(false);
 
             const recordKeybind = (setIsRecording: (value: boolean) => void) => {
-                let keys: Set<string> = new Set();
-                let keyLists: string[][] = [];
+                const keys: Set<string> = new Set();
+                const keyLists: string[][] = [];
 
                 setIsRecording(true);
                 isRecordingGlobal = true;
@@ -29,7 +36,7 @@ export const settings = definePluginSettings({
                     if (keys.size === 0 || !document.querySelector(`.${cl("key-recorder-button")}`)) {
                         const longestArray = keyLists.reduce((a, b) => a.length > b.length ? a : b);
                         if (longestArray.length > 0) {
-                            settings.store.hotkey = longestArray.map((key) => key.toLowerCase());
+                            settings.store.hotkey = longestArray.map(key => key.toLowerCase());
                         }
                         setIsRecording(false);
                         isRecordingGlobal = false;
@@ -89,8 +96,8 @@ export default definePlugin({
 
         if (IS_DEV) {
             registerAction({
-                id: 'openDevSettings',
-                label: 'Open Dev tab',
+                id: "openDevSettings",
+                label: "Open Dev tab",
                 callback: () => SettingsRouter.open("VencordPatchHelper"),
                 registrar: "Vencord"
             });
