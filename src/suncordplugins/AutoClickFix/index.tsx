@@ -5,12 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { cl } from "@components/ExpandableHeader";
+import { classNameFactory } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { useState } from "@webpack/common";
 
-
+const cl = classNameFactory("vc-command-palette-");
 let isRecordingGlobal = false;
 
 

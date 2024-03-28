@@ -16,30 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { classes } from "@utils/misc";
+import { classNameFactory } from "@api/Styles";
 import { useForceUpdater } from "@utils/react";
 import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { Button, ContextMenuApi, Flex, FluxDispatcher, Forms, useCallback, useEffect, useRef, UserStore, useState } from "@webpack/common";
 
-import { BasicChannelTabsProps, ChannelTabsProps, channelTabsSettings as settings, ChannelTabsUtils } from "../util";
+import { BasicChannelTabsProps, ChannelTabsProps, closeTab, createTab, handleChannelSwitch, isTabSelected, moveToTab, openedTabs, openStartupTabs, saveTabs, settings, setUpdaterFunction, useGhostTabs } from "../util";
 import BookmarkContainer from "./BookmarkContainer";
 import ChannelTab, { PreviewTab } from "./ChannelTab";
 import { BasicContextMenu, TabContextMenu } from "./ContextMenus";
 
-const {
-    closeTab, createTab, handleChannelSwitch, isTabSelected,
-    moveToTab, saveTabs, openStartupTabs, setUpdaterFunction
-} = ChannelTabsUtils;
+type TabSet = Record<string, ChannelTabsProps[]>;
 
 const { PlusSmallIcon } = findByPropsLazy("PlusSmallIcon");
 const XIcon = findComponentByCodeLazy("M18.4 4L12 10.4L5.6 4L4 5.6L10.4");
 
-const cl = (name: string) => `vc-channeltabs-${name}`;
+const cl = classNameFactory("vc-channeltabs-");
 
 export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
-    const { openTabs } = ChannelTabsUtils;
     const [userId, setUserId] = useState("");
     const { showBookmarkBar } = settings.use(["showBookmarkBar"]);
+    const GhostTabs = useGhostTabs();
 
     const _update = useForceUpdater();
     const update = useCallback((save = true) => {
@@ -63,7 +60,7 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         setUpdaterFunction(update);
         const onLogin = () => {
             const { id } = UserStore.getCurrentUser();
-            if (id === userId && openTabs.length) return;
+            if (id === userId && openedTabs.length) return;
             setUserId(id);
 
             openStartupTabs({ ...props, userId: id }, setUserId);
@@ -89,8 +86,8 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
         onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <BasicContextMenu />)}
     >
         <div className={cl("tab-container")}>
-            {openTabs.map((tab, i) => <div
-                className={classes(cl("tab"), tab.compact && cl("tab-compact"), isTabSelected(tab.id) && cl("tab-selected"))}
+            {openedTabs.map((tab, i) => <div
+                className={cl("tab", { "tab-compact": tab.compact, "tab-selected": isTabSelected(tab.id) })}
                 key={i}
                 onAuxClick={e => {
                     if (e.button === 1 /* middle click */)
@@ -99,14 +96,14 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
                 onContextMenu={e => ContextMenuApi.openContextMenu(e, () => <TabContextMenu tab={tab} />)}
             >
                 <button
-                    className={classes(cl("button"), cl("channel-info"))}
+                    className={cl("button", "channel-info")}
                     onClick={() => moveToTab(tab.id)}
                 >
                     <ChannelTab {...tab} index={i} />
                 </button>
 
-                {openTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
-                    className={classes(cl("button"), cl("close-button"), tab.compact ? cl("close-button-compact") : cl("hoverable"))}
+                {openedTabs.length > 1 && (tab.compact ? isTabSelected(tab.id) : true) && <button
+                    className={cl("button", "close-button", { "close-button-compact": tab.compact, "hoverable": !tab.compact })}
                     onClick={() => closeTab(tab.id)}
                 >
                     <XIcon height={16} width={16} />
@@ -116,15 +113,18 @@ export default function ChannelsTabsContainer(props: BasicChannelTabsProps) {
 
             <button
                 onClick={() => createTab(props, true)}
-                className={classes(cl("button"), cl("new-button"), cl("hoverable"))}
+                className={cl("button", "new-button", "hoverable")}
             >
                 <PlusSmallIcon height={20} width={20} />
             </button>
+
+            {GhostTabs}
         </div >
         {showBookmarkBar && <>
             <div className={cl("separator")} />
             <BookmarkContainer {...props} userId={userId} />
         </>}
+
     </div>;
 }
 
@@ -132,8 +132,8 @@ export function ChannelTabsPreview(p) {
     const id = UserStore.getCurrentUser()?.id;
     if (!id) return <Forms.FormText>there's no logged in account?????</Forms.FormText>;
 
-    const { setValue }: { setValue: (v: { [userId: string]: ChannelTabsProps[]; }) => void; } = p;
-    const { tabSet }: { tabSet: { [userId: string]: ChannelTabsProps[]; }; } = settings.use(["tabSet"]);
+    const { setValue }: { setValue: (v: TabSet) => void; } = p;
+    const { tabSet }: { tabSet: TabSet; } = settings.use(["tabSet"]);
 
     const placeholder = [{ guildId: "@me", channelId: undefined as any }];
     const [currentTabs, setCurrentTabs] = useState(tabSet?.[id] ?? placeholder);
@@ -148,8 +148,8 @@ export function ChannelTabsPreview(p) {
         <Flex flexDirection="row-reverse">
             <Button
                 onClick={() => {
-                    setCurrentTabs([...ChannelTabsUtils.openTabs]);
-                    setValue({ ...tabSet, [id]: [...ChannelTabsUtils.openTabs] });
+                    setCurrentTabs([...openedTabs]);
+                    setValue({ ...tabSet, [id]: [...openedTabs] });
                 }}
             >Set to currently open tabs</Button>
         </Flex>

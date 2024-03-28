@@ -90,6 +90,7 @@ export default definePlugin({
         } else if (imageExtensions.includes(fileType)) {
             return <img
                 src={gif.src}
+                alt={""}
                 width={props.coords.width}
                 height={props.coords.height}
                 className={cl("gif")}

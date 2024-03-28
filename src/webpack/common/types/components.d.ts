@@ -459,3 +459,8 @@ export type Avatar = ComponentType<PropsWithChildren<{
 type FocusLock = ComponentType<PropsWithChildren<{
     containerRef: RefObject<HTMLElement>;
 }>>;
+export type Dots = ComponentType<PropsWithChildren<{
+    dotRadius: number;
+    themed?: boolean;
+    className?: string;
+}>>;

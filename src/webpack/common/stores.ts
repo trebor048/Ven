@@ -96,6 +96,7 @@ waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
 waitForStore("ReadStateStore", m => ReadStateStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
+waitForStore("PoggerModeSettingsStore", m => PoggerModeSettingsStore = m);
 waitForStore("GuildChannelStore", m => GuildChannelStore = m);
 waitForStore("MessageStore", m => MessageStore = m);
 waitForStore("WindowStore", m => WindowStore = m);
