@@ -6,14 +6,19 @@
 
 import { ApplicationCommandOptionType } from "@api/Commands";
 import definePlugin from "@utils/types";
+import { MessageActions, SelectedChannelStore } from "@webpack/common";
 
 import { subredditChoices } from "./subredditchoices";
 
-function rand(min: number, max: number) {
+function getCurrentChannelId(): string {
+    return SelectedChannelStore.getChannelId();
+}
+
+function rand(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-async function fetchReddit(sub: string, sort: string = "top") {
+async function fetchReddit(sub: string, sort: string = "top"): Promise<string> {
     let imageUrl: string | null = null;
 
     do {
@@ -25,21 +30,20 @@ async function fetchReddit(sub: string, sort: string = "top") {
             const r = rand(0, children.length - 1);
             const candidateUrl = children[r].data.url;
 
-            // Check if the URL ends with a common image file extension
             if (/\.(jpg|jpeg|png|gif)$/i.test(candidateUrl)) {
                 imageUrl = candidateUrl;
             } else {
-                // Skip this URL and continue fetching
                 console.log("Skipping non-image URL:", candidateUrl);
             }
         } catch (err) {
             console.error(resp);
             console.error(err);
             imageUrl = "Error fetching image.";
+            break; // Exit the loop on error
         }
-    } while (!imageUrl); // Repeat until a valid image URL is found
+    } while (!imageUrl);
 
-    return imageUrl!;
+    return imageUrl ?? "Error fetching image.";
 }
 
 export default definePlugin({
@@ -91,7 +95,6 @@ export default definePlugin({
                         label: "Best", value: "best",
                         name: "best"
                     }
-
                 ],
             },
             {
@@ -127,7 +130,8 @@ export default definePlugin({
             const sort = args.find(arg => arg.name === "sort")?.value ?? "hot";
             const subreddit = args.find(arg => arg.name === "subreddit")?.value ?? "furrymemes";
             const count = parseInt(args.find(arg => arg.name === "count")?.value ?? "1");
-            const imageUrls: string[] = []; // Correct syntax for initializing an array of strings
+
+            const imageUrls: string[] = [];
             for (let i = 0; i < count; i++) {
                 const imageUrl = await fetchReddit(subreddit, sort);
                 if (imageUrl !== "Error fetching image.") {
@@ -135,9 +139,17 @@ export default definePlugin({
                 }
             }
 
-            return {
-                content: imageUrls.length > 0 ? imageUrls.join("\n") : "No images found."
-            };
+            if (count === 1) {
+                return { content: imageUrls[0] }; // Send the single image normally
+            } else if (count > 1) {
+                // Send the 2-5 URLs using MessageActions.sendMessage
+                for (let i = 0; i < imageUrls.length - 1; i++) {
+                    await MessageActions.sendMessage(getCurrentChannelId(), { content: imageUrls[i] });
+                }
+                // Send the last URL using the slash command
+                return { content: imageUrls[imageUrls.length - 1] };
+            }
         }
-    }]
+    }],
 });
+
